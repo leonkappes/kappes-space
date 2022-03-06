@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+    h1 {
+        @apply text-3xl py-2;
+    }
+    h2 {
+        @apply text-2xl py-2;
+    }
+    h3 {
+        @apply text-xl py-2;
+    }
+    html, body {
+        height: 100%;
+        width: 100%;
+        @apply bg-white dark:bg-gray-100;
+    }
+}
