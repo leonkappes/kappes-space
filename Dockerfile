@@ -2,8 +2,7 @@ FROM node:16-alpine AS deps
 # Check https://github.com/nodejs/docker-node/#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
-COPY package.json package-lock.json ./ 
-COPY svelte.config.js ./
+COPY . .
 RUN npm ci
 
 FROM node:16-alpine AS builder
