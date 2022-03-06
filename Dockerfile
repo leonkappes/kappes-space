@@ -16,6 +16,7 @@ WORKDIR /app
 ENV NODE_ENV production
 
 COPY --from=builder /app/build ./build
+COPY package*.json ./
 
 EXPOSE 3000
 
