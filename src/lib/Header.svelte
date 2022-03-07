@@ -61,13 +61,13 @@
 						aria-current="page">Home</a
 					>
 				</li>
-				<!-- <li>
+				<li>
 					<a
-						href="/about"
-						class="block py-2 pr-4 pl-3 {cur.url.pathname == '/about' ? activeClasses : inActiveClasses}"
-						>About</a
+						href="/projects"
+						class="block py-2 pr-4 pl-3 {$page.url.pathname == '/projects' ? activeClasses : inActiveClasses}"
+						>Projects</a
 					> 
-				</li>-->
+				</li>
 			</ul>
 		</div>
 	</div>
