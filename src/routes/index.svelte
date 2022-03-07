@@ -1,11 +1,5 @@
 <script>
-	import Footer from '$lib/Footer.svelte';
-
 	import { onMount } from 'svelte';
-	// @ts-ignore
-	import src from '$lib/assets/intro.jpg?format=avif&srcset';
-	import srcWebP from '$lib/assets/intro.jpg?format=webp&srcset';
-	import fallbackSrc from '$lib/assets/intro.jpg';
 
 	onMount(async () => {
 		const module = await import('tsparticles');
@@ -22,29 +16,21 @@
 		},
 		particles: {
 			number: {
-				value: 50,
+				value: 60,
 				density: {
 					enable: true,
-					value_area: 800
+					value_area: 700
 				}
 			},
 			color: {
 				value: '#ffffff'
 			},
 			shape: {
-				type: 'polygon',
+				type: 'circle',
 				stroke: {
 					width: 0,
 					color: '#000000'
 				},
-				polygon: {
-					nb_sides: 3
-				},
-				image: {
-					src: 'img/github.svg',
-					width: 100,
-					height: 100
-				}
 			},
 			opacity: {
 				value: 1,
@@ -53,7 +39,7 @@
 					enable: true,
 					speed: 1,
 					opacity_min: 0,
-					sync: false
+					sync: true
 				}
 			},
 			size: {
@@ -61,7 +47,7 @@
 				random: true,
 				anim: {
 					enable: false,
-					speed: 4,
+					speed: 3,
 					size_min: 0.3,
 					sync: false
 				}
@@ -88,45 +74,6 @@
 				}
 			}
 		},
-		interactivity: {
-			detect_on: 'canvas',
-			events: {
-				onhover: {
-					enable: false,
-					mode: 'grab'
-				},
-				onclick: {
-					enable: false,
-					mode: 'repulse'
-				},
-				resize: true
-			},
-			modes: {
-				grab: {
-					distance: 80,
-					line_linked: {
-						opacity: 1
-					}
-				},
-				bubble: {
-					distance: 250,
-					size: 0,
-					duration: 2,
-					opacity: 0,
-					speed: 3
-				},
-				repulse: {
-					distance: 400,
-					duration: 0.4
-				},
-				push: {
-					particles_nb: 4
-				},
-				remove: {
-					particles_nb: 2
-				}
-			}
-		},
 		retina_detect: true
 	};
 </script>
@@ -136,18 +83,13 @@
 </svelte:head>
 
 <div class="w-full h-full flex items-center justify-center relative">
-	<div class="absolute w-full h-full">
-		<picture>
-			<source srcset={src} type="image/avif" />
-			<source srcset={srcWebP} type="image/webp" />
-			<img class="h-full w-full" alt="BG" loading="eager" decoding="async" src="{fallbackSrc}"/>
-		</picture>
+	<div class="absolute w-full h-full bg-gray-800 dark:bg-gray-700">
 	</div>
 	<div class="absolute w-full h-full" id="particles" />
 	<div class="flex flex-col items-center justify-center m-auto">
 		<h1 class="lg:text-9xl md:text-6xl text-4xl mx-3 text-white z-10">Hi, I'm Leon Kappes</h1>
-		<hr class="md:w-14 w-6 mb-24 z-10" />
-		<section class="flex justify-center items-center md:text-6xl text-lg">
+		<hr class="w-2/3 mb-24 z-10 opacity-50" />
+		<section class="flex justify-center items-center md:text-3xl text-lg">
 			<a
 				href="mailto:leon@kappes.space"
 				target="_blank"
@@ -156,7 +98,7 @@
 			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
-					class="h-10 w-10"
+					class="md:h-8 md:w-8 h-4 w-4"
 					viewBox="0 0 20 20"
 					fill="currentColor"
 				>
@@ -175,7 +117,7 @@
 			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
-					class="h-10 w-10 m-0"
+					class="md:h-8 md:w-8 h-4 w-4"
 					fill="none"
 					viewBox="0 0 24 24"
 					stroke="currentColor"
