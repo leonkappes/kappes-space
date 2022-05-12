@@ -1,6 +1,4 @@
 <script lang="ts">
-	import type Image from './Image.svelte';
-
 	export let href: string = "";
 	export let image: boolean = false;
 	export let title: string;
@@ -18,7 +16,7 @@
 	{#if image}
 		<slot></slot>
 	{/if}
-	<div class="flex flex-col justify-between p-4 leading-normal">
+	<div class="flex flex-col justify-between p-4 leading-normal w-full">
 		<h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
 			{title}
 		</h5>
