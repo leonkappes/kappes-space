@@ -7,17 +7,14 @@ RUN npm ci
 
 FROM node:16-alpine AS builder
 WORKDIR /app
+ENV NODE_ENV production
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-FROM node:16-alpine AS runner
-WORKDIR /app
-ENV NODE_ENV production
+FROM nginx:1-alpine AS server
+WORKDIR /usr/share/nginx/html
 
-COPY --from=builder /app/build ./build
-COPY package*.json ./
-
-EXPOSE 3000
-
-CMD ["node", "build/"]
+COPY ./docker/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/build .

@@ -1,6 +1,8 @@
-import adapter from '@sveltejs/adapter-node';
+import adapter from '@sveltejs/adapter-static';
 import preprocess from 'svelte-preprocess';
-import { imagetools } from 'vite-imagetools';
+import path from "path";
+import { chunkSplitPlugin } from 'vite-plugin-chunk-split';
+
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -9,11 +11,17 @@ const config = {
 	preprocess: preprocess(),
 
 	kit: {
-		adapter: adapter(),
+		adapter: adapter({
+			precompress: true
+		}),
 		vite: {
 			plugins: [
-				imagetools()
+				chunkSplitPlugin(),
 			]
+		},
+		prerender: {
+			default: true,
+			crawl: true,
 		}
 	}
 };
