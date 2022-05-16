@@ -1,10 +1,13 @@
 <script>
 	import { onMount } from 'svelte';
+	import { loadFull } from "tsparticles";
 
 	onMount(async () => {
-		const module = await import('tsparticles');
+		const module = await import('tsparticles-engine');
 
 		let tsParticles = module.tsParticles;
+
+		loadFull(tsParticles)
 
 		// @ts-ignore
 		tsParticles.load('particles', particlesConfig);
