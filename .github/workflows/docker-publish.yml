@@ -60,7 +60,6 @@ jobs:
             type=sha,format=long
             type=ref,event=branch
             type=ref,event=pr
-            type=semver,pattern={{version}}
           flavor: latest=true
 
       # Build and push Docker image with Buildx (don't push on PR)
