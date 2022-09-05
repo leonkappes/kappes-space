@@ -11,6 +11,7 @@ import Card from "$lib/Card.svelte";
             <Card title="Saltychat Troubleshooter" description="A little tool(winforms) for the saltychat Teamspeak 3 Plugin. It resolves common errors endusers faced" href="https://github.com/leonkappes/Saltytroubleshooter"></Card>
             <Card title="FXServer Manager" description="Automatically restarts an FXServer/Fivem-Server(servers provided by the community for the game Grand Theft Auto V) at configured times and restarts the server if a crash is detected" href="https://github.com/leonkappes/FXServer-Autorestart"></Card>
             <Card title="Technikapp" description="Website for managing for event-technicans with an event rooster, a inventory and user managment." href="https://github.com/leonkappes/technikapp"></Card>
+            <Card title="Helmrepository" descriptio="Helmrepository for my personal projects" href="https://github.com/leonkappes/helm-charts"></Card>
         </div>
     </div>
 </div>
