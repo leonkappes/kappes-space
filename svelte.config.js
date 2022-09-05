@@ -1,6 +1,5 @@
 import adapter from '@sveltejs/adapter-static';
 import preprocess from 'svelte-preprocess';
-import path from "path";
 import { chunkSplitPlugin } from 'vite-plugin-chunk-split';
 
 
@@ -12,7 +11,8 @@ const config = {
 
 	kit: {
 		adapter: adapter({
-			precompress: true
+			precompress: true,
+			fallback: "index.html"
 		}),
 		vite: {
 			plugins: [
