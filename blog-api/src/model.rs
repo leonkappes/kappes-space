@@ -17,6 +17,8 @@ pub struct PostDTO {
     pub published: PostStatus,
 }
 
+#[derive(Insertable, Debug)]
+#[diesel(table_name = posts)]
 pub struct CreatePostDTO {
     pub title: String,
     pub author: String,
@@ -24,7 +26,7 @@ pub struct CreatePostDTO {
 }
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, AsExpression, FromSqlRow)]
-#[sql_type = "Text"]
+#[diesel(sql_type = Text)]
 pub enum PostStatus {
     Published,
     Private,
@@ -44,7 +46,7 @@ impl ToSql<Text, Pg> for PostStatus {
 
 impl FromSql<Text, Pg> for PostStatus {
     fn from_sql(bytes: RawValue<'_, Pg>) -> diesel::deserialize::Result<Self> {
-        match not_none!(bytes) {
+        match bytes.as_bytes() {
             b"PRIVATE" => Ok(PostStatus::Private),
             b"PUBLISHED" => Ok(PostStatus::Published),
             b"UNLISTED" => Ok(PostStatus::Unlisted),
