@@ -1,3 +1,4 @@
+use diesel::r2d2::{PooledConnection, ConnectionManager};
 use serde_derive::{Deserialize, Serialize};
 use diesel::pg::Pg;
 use diesel::prelude::*;
@@ -7,7 +8,7 @@ use diesel::deserialize::FromSql;
 use diesel::sql_types::Text;
 use std::io::Write;
 use diesel::backend::RawValue;
-use crate::schema::posts;
+use crate::schema::posts::{self, dsl::*};
 
 #[derive(Serialize, Debug, Clone, Queryable)]
 pub struct PostDTO {
@@ -15,6 +16,16 @@ pub struct PostDTO {
     pub title: String,
     pub author: String,
     pub published: PostStatus,
+}
+
+impl PostDTO {
+    pub fn get_all_posts(mut conn: PooledConnection<ConnectionManager<PgConnection>>) -> Result<Vec<PostDTO>, diesel::result::Error> {
+        posts.load::<PostDTO>(&mut conn)
+    }
+
+    pub fn get_public_posts(mut conn: PooledConnection<ConnectionManager<PgConnection>>) -> Result<Vec<PostDTO>, diesel::result::Error> {
+        posts.filter(published.eq(PostStatus::Published)).or_filter(published.eq(PostStatus::Unlisted)).load::<PostDTO>(&mut conn)
+    }
 }
 
 #[derive(Insertable, Debug)]
