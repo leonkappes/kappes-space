@@ -3,7 +3,7 @@
 >
 	<div class="text-sm h-5 flex justify-center items-center text-gray-500 sm:text-center dark:text-gray-400">
 		© 2022 Leon Kappes. Code available on <a
-				href="https://github.com/leonkappes"
+				href="https://github.com/leonkappes/kappes-space"
 				class="flex items-center px-2 hover:underline hover:text-indigo-700 dark:hover:text-white"
 			>
 				<svg
