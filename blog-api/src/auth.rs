@@ -1,8 +1,8 @@
 use chrono::Utc;
 use jsonwebtoken::{EncodingKey, Header, TokenData, Validation, DecodingKey};
 use serde::{Serialize, Deserialize};
+use crate::models::user::UserDTO;
 
-use crate::models::user::User;
 
 pub static KEY: [u8; 16] = *b"asd1235234234234";
 static ONE_WEEK: i64 = 60 * 60 * 24 * 7; // in seconds
@@ -15,16 +15,16 @@ pub struct UserToken {
     pub exp: i64,
     // data
     pub user: String,
-    pub user_id: u64,
+    pub user_id: i64,
 }
 
 impl UserToken {
-    pub fn generate_token(login: &User) -> String {
+    pub fn generate_token(login: &UserDTO) -> String {
         let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nanosecond -> second
         let payload = UserToken {
             iat: now,
             exp: now + ONE_WEEK,
-            user: login.username.clone(),
+            user: login.name.clone(),
             user_id: login.id.clone(),
         };
 

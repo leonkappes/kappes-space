@@ -1,7 +1,8 @@
-mod model;
+mod models;
 mod schema;
 mod database;
 mod routes;
+mod auth;
 use std::error::Error;
 
 use actix_web::{HttpServer, App, web::{Data, self}, middleware};
@@ -43,6 +44,7 @@ async fn main() -> std::io::Result<()> {
             .route("/health", web::get().to(health))
             .route("/posts", web::get().to(get_posts))
             .route("/posts/test", web::get().to(create_test_data))
+            .route("/posts/author/{uname}", web::get().to(get_by_user))
             .wrap(middleware::Logger::default())
             .app_data(Data::new(pool.clone()))
     })

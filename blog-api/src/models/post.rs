@@ -9,12 +9,16 @@ use diesel::sql_types::Text;
 use std::io::Write;
 use diesel::backend::RawValue;
 use crate::schema::posts::{self, dsl::*};
+use crate::models::user::UserDTO;
 
-#[derive(Serialize, Debug, Clone, Queryable)]
+#[derive(Serialize, Debug, Clone, Queryable, Associations, Identifiable)]
+#[diesel(belongs_to(UserDTO, foreign_key = author), table_name = posts)]
 pub struct PostDTO {
     pub id: i64,
     pub title: String,
-    pub author: String,
+    pub author: i64,
+    pub content: String,
+    pub content_md: String,
     pub published: PostStatus,
 }
 
@@ -32,8 +36,10 @@ impl PostDTO {
 #[diesel(table_name = posts)]
 pub struct CreatePostDTO {
     pub title: String,
-    pub author: String,
+    pub author: i64,
     pub published: PostStatus,
+    pub content: String,
+    pub content_md: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, AsExpression, FromSqlRow)]
