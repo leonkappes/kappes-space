@@ -4,7 +4,7 @@ use serde::{Serialize, Deserialize};
 use crate::models::user::UserDTO;
 
 
-static  KEY: [u8; 16] = *b"asd1235234234234";
+static KEY: [u8; 16] = *b"asd1235234234234";
 static ONE_WEEK: i64 = 60 * 60 * 24 * 7; // in seconds
 
 #[derive(Serialize, Deserialize, Clone)]

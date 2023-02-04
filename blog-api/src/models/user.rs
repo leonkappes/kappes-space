@@ -1,3 +1,4 @@
+use actix_web::error;
 use argon2::{Argon2, PasswordHasher, PasswordHash, PasswordVerifier};
 use argon2::password_hash::SaltString;
 use diesel::r2d2::{PooledConnection, ConnectionManager};
@@ -5,7 +6,7 @@ use diesel::result::Error;
 use rand_core::OsRng;
 use serde_derive::{Deserialize, Serialize};
 use diesel::pg::Pg;
-use diesel::prelude::*;
+use diesel::{prelude::*, insert_into};
 use diesel::{FromSqlRow, AsExpression};
 use diesel::serialize::{ToSql, Output, IsNull};
 use diesel::deserialize::FromSql;
@@ -53,21 +54,28 @@ pub struct CreateUserDTO {
 
 impl CreateUserDTO {
     // TODO: Get the hashing into utility function
-    pub fn new_user(uname: String, upassword: String, upermission: Permission) -> Result<CreateUserDTO, argon2::password_hash::Error> {
+    pub fn new_user(uname: String, upassword: String, upermission: Permission, mut conn: PooledConnection<ConnectionManager<PgConnection>>) -> Result<UserDTO, actix_web::Error> {
         let salt = SaltString::generate(&mut OsRng);
         // Argon2 with default params (Argon2id v19)
         let argon2 = Argon2::default();
         // Hash password to PHC string ($argon2id$v=19$...)
         let password_hash = match argon2.hash_password(upassword.as_bytes(), &salt) {
             Ok(it) => it,
-            Err(err) => return Err(err),
+            Err(err) => return Err(error::ErrorBadRequest(err)),
         }.to_string();
 
-        Ok(CreateUserDTO {
+        let new_user = CreateUserDTO {
             name : uname,
             password : password_hash,
             permission : upermission
-        })
+        };
+
+        let res = insert_into(users).values(new_user).get_result::<UserDTO>(&mut conn);
+
+        match res {
+            Ok(user) => return Ok(user),
+            Err(err) => return Err(error::ErrorBadRequest(err))
+        }
     }
 }
 
