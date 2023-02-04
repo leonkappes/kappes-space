@@ -1,8 +1,10 @@
-use chrono::Utc;
-use jsonwebtoken::{EncodingKey, Header, TokenData, Validation, DecodingKey};
-use serde::{Serialize, Deserialize};
 use crate::models::user::UserDTO;
-
+use actix_web::{error, Error};
+use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
+use chrono::Utc;
+use jsonwebtoken::{DecodingKey, EncodingKey, Header, TokenData, Validation};
+use rand_core::OsRng;
+use serde::{Deserialize, Serialize};
 
 static KEY: [u8; 16] = *b"asd1235234234234";
 static ONE_WEEK: i64 = 60 * 60 * 24 * 7; // in seconds
@@ -50,4 +52,15 @@ pub fn validate_token(cred: &str) -> Result<UserToken, String> {
         return Ok(token_data.claims);
     }
     return Err("Invalid Token".to_owned());
+}
+
+pub fn hash_password(password: String) -> Result<String, Error> {
+    let salt = SaltString::generate(&mut OsRng);
+    // Argon2 with default params (Argon2id v19)
+    let argon2 = Argon2::default();
+    // Hash password to PHC string ($argon2id$v=19$...)
+    match argon2.hash_password(password.as_bytes(), &salt) {
+        Ok(it) => return Ok(it.to_string()),
+        Err(err) => return Err(error::ErrorInternalServerError(err)),
+    }
 }

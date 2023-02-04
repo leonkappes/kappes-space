@@ -3,7 +3,7 @@ use diesel::result::Error::NotFound;
 use serde::Deserialize;
 use serde_json::json;
 
-use crate::{auth::UserToken, database::postgres::Pool, models::user::{UserDTO, CreateUserDTO}};
+use crate::{auth::{UserToken, hash_password}, database::postgres::Pool, models::user::{UserDTO, CreateUserDTO}};
 
 #[derive(Deserialize)]
 pub struct AuthFormData {
@@ -33,7 +33,6 @@ pub async fn login(
             })));
         }
     }
-
     Ok(HttpResponse::Unauthorized().json(json!({
         "message": "Invalid username/password"
     })))

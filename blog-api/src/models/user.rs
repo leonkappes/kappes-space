@@ -14,6 +14,7 @@ use diesel::sql_types::Text;
 use diesel::backend::RawValue;
 use std::io::Write;
 
+use crate::auth::hash_password;
 use crate::schema::users::{self, dsl::*};
 
 #[derive(Serialize, Debug, Clone, Queryable, Identifiable)]
@@ -30,16 +31,16 @@ impl UserDTO {
         users.filter(name.eq(uname)).first::<UserDTO>(&mut conn)
     }
 
-    pub fn login(&self, password_hash: String) -> Result<bool, argon2::password_hash::Error> {
+    pub fn login(&self, provided_password: String) -> Result<bool, argon2::password_hash::Error> {
         // Verify password against PHC string.
         //
         // NOTE: hash params from `parsed_hash` are used instead of what is configured in the
         // `Argon2` instance.
-        let parsed_hash = match PasswordHash::new(&password_hash) {
+        let parsed_hash = match PasswordHash::new(&self.password) {
             Ok(it) => it,
             Err(err) => return Err(err),
         };
-        Ok(Argon2::default().verify_password(self.password.as_bytes(), &parsed_hash).is_ok())
+        Ok(Argon2::default().verify_password(provided_password.as_bytes(), &parsed_hash).is_ok())
     }
 }
 
@@ -55,14 +56,10 @@ pub struct CreateUserDTO {
 impl CreateUserDTO {
     // TODO: Get the hashing into utility function
     pub fn new_user(uname: String, upassword: String, upermission: Permission, mut conn: PooledConnection<ConnectionManager<PgConnection>>) -> Result<UserDTO, actix_web::Error> {
-        let salt = SaltString::generate(&mut OsRng);
-        // Argon2 with default params (Argon2id v19)
-        let argon2 = Argon2::default();
-        // Hash password to PHC string ($argon2id$v=19$...)
-        let password_hash = match argon2.hash_password(upassword.as_bytes(), &salt) {
-            Ok(it) => it,
-            Err(err) => return Err(error::ErrorBadRequest(err)),
-        }.to_string();
+        let password_hash = match hash_password(upassword) {
+            Ok(hash) => hash,
+            Err(err) => return Err(error::ErrorInternalServerError(err))
+        };
 
         let new_user = CreateUserDTO {
             name : uname,
