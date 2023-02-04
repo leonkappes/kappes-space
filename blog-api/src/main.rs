@@ -9,7 +9,7 @@ use actix_web::{HttpServer, App, web::{Data, self}, middleware};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use diesel::pg::Pg;
 
-use crate::{database::postgres::establish_connection, routes::{index::*, posts::*}};
+use crate::{database::postgres::establish_connection, routes::{index::*, posts::*, auth::login}};
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
 
 
@@ -45,6 +45,8 @@ async fn main() -> std::io::Result<()> {
             .route("/posts", web::get().to(get_posts))
             .route("/posts/test", web::get().to(create_test_data))
             .route("/posts/author/{uname}", web::get().to(get_by_user))
+            .route("/posts", web::post().to(insert_post))
+            .route("/auth/login", web::post().to(login))
             .wrap(middleware::Logger::default())
             .app_data(Data::new(pool.clone()))
     })

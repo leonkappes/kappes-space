@@ -4,7 +4,7 @@ use serde::{Serialize, Deserialize};
 use crate::models::user::UserDTO;
 
 
-pub static KEY: [u8; 16] = *b"asd1235234234234";
+static  KEY: [u8; 16] = *b"asd1235234234234";
 static ONE_WEEK: i64 = 60 * 60 * 24 * 7; // in seconds
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -20,7 +20,7 @@ pub struct UserToken {
 
 impl UserToken {
     pub fn generate_token(login: &UserDTO) -> String {
-        let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nanosecond -> second
+        let now = Utc::now().timestamp();
         let payload = UserToken {
             iat: now,
             exp: now + ONE_WEEK,
@@ -45,7 +45,7 @@ pub fn decode_token(token: String) -> jsonwebtoken::errors::Result<TokenData<Use
     )
 }
 
-pub fn validate_token(cred: &str, ) -> Result<UserToken, String> {
+pub fn validate_token(cred: &str) -> Result<UserToken, String> {
     if let Ok(token_data) = decode_token(cred.to_owned()) {
         return Ok(token_data.claims);
     }

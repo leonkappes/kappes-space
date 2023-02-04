@@ -1,5 +1,8 @@
+use argon2::{Argon2, PasswordHasher, PasswordHash, PasswordVerifier};
+use argon2::password_hash::SaltString;
 use diesel::r2d2::{PooledConnection, ConnectionManager};
 use diesel::result::Error;
+use rand_core::OsRng;
 use serde_derive::{Deserialize, Serialize};
 use diesel::pg::Pg;
 use diesel::prelude::*;
@@ -25,6 +28,18 @@ impl UserDTO {
     pub fn get_user(uname: String, mut conn: PooledConnection<ConnectionManager<PgConnection>>) -> Result<UserDTO, Error> {
         users.filter(name.eq(uname)).first::<UserDTO>(&mut conn)
     }
+
+    pub fn login(&self, password_hash: String) -> Result<bool, argon2::password_hash::Error> {
+        // Verify password against PHC string.
+        //
+        // NOTE: hash params from `parsed_hash` are used instead of what is configured in the
+        // `Argon2` instance.
+        let parsed_hash = match PasswordHash::new(&password_hash) {
+            Ok(it) => it,
+            Err(err) => return Err(err),
+        };
+        Ok(Argon2::default().verify_password(self.password.as_bytes(), &parsed_hash).is_ok())
+    }
 }
 
 
@@ -34,6 +49,26 @@ pub struct CreateUserDTO {
     pub name: String,
     pub password: String,
     pub permission: Permission,
+}
+
+impl CreateUserDTO {
+    // TODO: Get the hashing into utility function
+    pub fn new_user(uname: String, upassword: String, upermission: Permission) -> Result<CreateUserDTO, argon2::password_hash::Error> {
+        let salt = SaltString::generate(&mut OsRng);
+        // Argon2 with default params (Argon2id v19)
+        let argon2 = Argon2::default();
+        // Hash password to PHC string ($argon2id$v=19$...)
+        let password_hash = match argon2.hash_password(upassword.as_bytes(), &salt) {
+            Ok(it) => it,
+            Err(err) => return Err(err),
+        }.to_string();
+
+        Ok(CreateUserDTO {
+            name : uname,
+            password : password_hash,
+            permission : upermission
+        })
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, AsExpression, FromSqlRow)]
