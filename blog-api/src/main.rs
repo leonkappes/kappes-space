@@ -23,6 +23,7 @@ use crate::{
         auth::{login, signup},
         index::*,
         posts::*,
+        settings::toggle_registration,
     },
 };
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
@@ -67,18 +68,16 @@ async fn main() -> std::io::Result<()> {
                     .route("", web::get().to(get_posts))
                     .route("/test", web::get().to(create_test_data))
                     .route("/author/{uname}", web::get().to(get_by_user))
-                    .service(
-                        web::scope("/create")
-                            .route("", web::post().to(insert_post))
-                            .wrap(Compat::new(auth.clone())),
-                    ),
+                    .route("", web::post().to(insert_post)),
             )
             .service(
                 web::scope("/auth")
                     .route("/login", web::post().to(login))
                     .route("/signup", web::post().to(signup)),
             )
+            .service(web::scope("/settings").route("", web::post().to(toggle_registration)))
             .wrap(middleware::Logger::default())
+            .wrap(Compat::new(auth.clone()))
             .app_data(Data::new(pool.clone()))
             .app_data(config.clone())
     })
