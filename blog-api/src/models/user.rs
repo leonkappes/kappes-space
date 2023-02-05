@@ -31,6 +31,13 @@ impl UserDTO {
         users.filter(name.eq(uname)).first::<UserDTO>(&mut conn)
     }
 
+    pub fn get_user_by_id(
+        uid: i64,
+        mut conn: PooledConnection<ConnectionManager<PgConnection>>,
+    ) -> Result<UserDTO, Error> {
+        users.filter(id.eq(uid)).first::<UserDTO>(&mut conn)
+    }
+
     pub fn login(&self, provided_password: String) -> Result<bool, argon2::password_hash::Error> {
         // Verify password against PHC string.
         // NOTE: hash params from `parsed_hash` are used instead of what is configured in the
@@ -54,7 +61,6 @@ pub struct CreateUserDTO {
 }
 
 impl CreateUserDTO {
-    // TODO: Get the hashing into utility function
     pub fn new_user(
         uname: String,
         upassword: String,
@@ -83,7 +89,7 @@ impl CreateUserDTO {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Copy, Clone, AsExpression, FromSqlRow)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, AsExpression, FromSqlRow, PartialEq)]
 #[diesel(sql_type = Text)]
 pub enum Permission {
     Admin,

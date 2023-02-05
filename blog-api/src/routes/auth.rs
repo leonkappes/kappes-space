@@ -1,7 +1,6 @@
 use std::sync::atomic::Ordering;
 
-use actix_web::{dev::ServiceRequest, error, web, Error, HttpResponse};
-use actix_web_httpauth::extractors::{bearer::BearerAuth, AuthenticationError};
+use actix_web::{error, web, Error, HttpResponse};
 use diesel::result::Error::NotFound;
 use serde::Deserialize;
 use serde_json::json;
@@ -42,7 +41,7 @@ pub async fn login(
         }
     }
     Ok(HttpResponse::Unauthorized().json(json!({
-        "message": "Invalid username/password"
+        "msg": "Invalid username/password"
     })))
 }
 

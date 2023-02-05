@@ -1,13 +1,18 @@
-use actix_web::{error, web, Error, HttpResponse};
+use actix_web::{
+    error,
+    web::{self, Data, ReqData},
+    Error, HttpResponse,
+};
 use diesel::{insert_into, BelongingToDsl, RunQueryDsl};
 use serde::Deserialize;
 use serde_json::json;
 
 use crate::{
+    auth::UserToken,
     database::postgres::Pool,
     models::{
         post::{CreatePostDTO, PostDTO, PostStatus},
-        user::{CreateUserDTO, UserDTO},
+        user::{CreateUserDTO, Permission, UserDTO},
     },
     schema::{posts::dsl::*, users::dsl::*},
 };
@@ -52,11 +57,33 @@ pub struct FormData {
 
 pub async fn insert_post(
     db: web::Data<Pool>,
+    creds: Option<ReqData<UserToken>>,
     form: web::Form<FormData>,
 ) -> Result<HttpResponse, Error> {
+    let user = if let Some(creds) = creds {
+        match UserDTO::get_user_by_id(creds.user_id, db.get().unwrap()) {
+            Ok(it) => it,
+            Err(_) => {
+                return Err(error::ErrorForbidden(json!({
+                    "message": "No permission to create a post1"
+                })))
+            }
+        }
+    } else {
+        return Err(error::ErrorForbidden(json!({
+            "message": "No permission to create a post2"
+        })));
+    };
+
+    if user.permission == Permission::User {
+        return Err(error::ErrorForbidden(json!({
+            "message": "No permission to create a post3"
+        })));
+    }
+
     let post = CreatePostDTO {
         title: form.title.to_owned(),
-        author: 1,
+        author: user.id,
         published: form.status,
         content: form.text.to_owned(),
         content_md: form.text_md.to_owned(),
@@ -64,10 +91,20 @@ pub async fn insert_post(
 
     match insert_into(posts)
         .values(post)
-        .execute(&mut db.get().unwrap())
+        .get_result::<PostDTO>(&mut db.get().unwrap())
     {
-        Ok(_) => return Ok(HttpResponse::Ok().json("value")),
-        Err(err) => return Err(error::ErrorBadRequest(err)),
+        Ok(res) => {
+            return Ok(HttpResponse::Ok().json(json!({
+                "message": "Post created successfully",
+                "post": res
+            })))
+        }
+        Err(err) => {
+            return Err(error::ErrorInternalServerError(json!({
+                "message": "No permission to create a post",
+                "error": err.to_string()
+            })))
+        }
     }
 }
 

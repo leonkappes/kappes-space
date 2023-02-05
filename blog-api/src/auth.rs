@@ -1,9 +1,6 @@
 use crate::models::user::UserDTO;
 use actix_web::{dev::ServiceRequest, error, Error, HttpMessage};
-use actix_web_httpauth::extractors::{
-    bearer::{self, BearerAuth, Config},
-    AuthenticationError,
-};
+use actix_web_httpauth::extractors::bearer::BearerAuth;
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
 use chrono::Utc;
 use jsonwebtoken::{DecodingKey, EncodingKey, Header, TokenData, Validation};
@@ -74,19 +71,17 @@ pub async fn bearer_auth_validator(
     req: ServiceRequest,
     credentials: Option<BearerAuth>,
 ) -> Result<ServiceRequest, (Error, ServiceRequest)> {
+    println!("Here");
     match credentials {
-        None => {
-            return Err((
-                error::ErrorUnauthorized(json!({"msg": "Unauthorized"})),
-                req,
-            ))
-        }
+        None => return Ok(req),
         Some(cred) => match validate_token(cred.token()) {
             Ok(res) => {
+                println!("Insert");
                 req.extensions_mut().insert(res);
                 return Ok(req);
             }
             Err(msg) => {
+                println!("err");
                 return Err((error::ErrorUnauthorized(json!({ "msg": msg })), req));
             }
         },
