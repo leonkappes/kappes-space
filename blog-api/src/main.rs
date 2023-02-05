@@ -1,20 +1,35 @@
-mod models;
-mod schema;
-mod database;
-mod routes;
 mod auth;
-use std::error::Error;
+mod config;
+mod database;
+mod models;
+mod routes;
+mod schema;
+use std::{error::Error, sync::atomic::AtomicBool};
 
-use actix_web::{HttpServer, App, web::{Data, self}, middleware};
-use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+use actix_web::{
+    middleware::{self, Compat},
+    web::{self, Data},
+    App, HttpServer,
+};
+use actix_web_httpauth::middleware::HttpAuthentication;
 use diesel::pg::Pg;
+use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
-use crate::{database::postgres::establish_connection, routes::{index::*, posts::*, auth::{login, signup}}};
+use crate::{
+    auth::bearer_auth_validator,
+    config::Config,
+    database::postgres::establish_connection,
+    routes::{
+        auth::{login, signup},
+        index::*,
+        posts::*,
+    },
+};
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
 
-
-fn run_migrations(connection: &mut impl MigrationHarness<Pg>) -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
-
+fn run_migrations(
+    connection: &mut impl MigrationHarness<Pg>,
+) -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
     // This will run the necessary migrations.
     //
     // See the documentation for `MigrationHarness` for
@@ -31,10 +46,15 @@ async fn main() -> std::io::Result<()> {
     let migration = run_migrations(&mut pool.get().unwrap());
     if let Ok(_) = migration {
         println!("Migrations successfull")
-    }else if let Err(e) = migration {
+    } else if let Err(e) = migration {
         println!("Error running migrations: {:?}", e)
     }
 
+    let config = web::Data::new(Config {
+        allow_signups: AtomicBool::new(true),
+    });
+
+    let auth = HttpAuthentication::with_fn(bearer_auth_validator);
 
     println!("Booting up Rest-Server");
 
@@ -42,14 +62,25 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .route("/", web::get().to(index))
             .route("/health", web::get().to(health))
-            .route("/posts", web::get().to(get_posts))
-            .route("/posts/test", web::get().to(create_test_data))
-            .route("/posts/author/{uname}", web::get().to(get_by_user))
-            .route("/posts", web::post().to(insert_post))
-            .route("/auth/login", web::post().to(login))
-            .route("/auth/signup", web::post().to(signup))
+            .service(
+                web::scope("/posts")
+                    .route("", web::get().to(get_posts))
+                    .route("/test", web::get().to(create_test_data))
+                    .route("/author/{uname}", web::get().to(get_by_user))
+                    .service(
+                        web::scope("/create")
+                            .route("", web::post().to(insert_post))
+                            .wrap(Compat::new(auth.clone())),
+                    ),
+            )
+            .service(
+                web::scope("/auth")
+                    .route("/login", web::post().to(login))
+                    .route("/signup", web::post().to(signup)),
+            )
             .wrap(middleware::Logger::default())
             .app_data(Data::new(pool.clone()))
+            .app_data(config.clone())
     })
     .bind(("127.0.0.1", 8080))?
     .run()

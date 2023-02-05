@@ -1,9 +1,17 @@
-use actix_web::{error, web, Error, HttpResponse};
+use std::sync::atomic::Ordering;
+
+use actix_web::{dev::ServiceRequest, error, web, Error, HttpResponse};
+use actix_web_httpauth::extractors::{bearer::BearerAuth, AuthenticationError};
 use diesel::result::Error::NotFound;
 use serde::Deserialize;
 use serde_json::json;
 
-use crate::{auth::{UserToken, hash_password}, database::postgres::Pool, models::user::{UserDTO, CreateUserDTO}};
+use crate::{
+    auth::UserToken,
+    config::Config,
+    database::postgres::Pool,
+    models::user::{CreateUserDTO, UserDTO},
+};
 
 #[derive(Deserialize)]
 pub struct AuthFormData {
@@ -41,22 +49,35 @@ pub async fn login(
 pub async fn signup(
     db: web::Data<Pool>,
     form: web::Form<AuthFormData>,
+    config: web::Data<Config>,
 ) -> Result<HttpResponse, Error> {
+    if config.allow_signups.load(Ordering::SeqCst) != true {
+        return Ok(HttpResponse::Forbidden().json(json!({
+            "message": "Signup has been disabled",
+            "jwt": ""
+        })));
+    }
+
     let user_query = UserDTO::get_user(form.username.to_owned(), db.get().unwrap());
     if let Err(err) = user_query {
         if err != NotFound {
             return Ok(HttpResponse::InternalServerError().json(json!({
                 "message": "Internal error while creating account, please try again later",
                 "jwt": ""
-            })))
+            })));
         }
-        match CreateUserDTO::new_user(form.username.to_owned(), form.password.to_owned(), crate::models::user::Permission::User, db.get().unwrap()) {
+        match CreateUserDTO::new_user(
+            form.username.to_owned(),
+            form.password.to_owned(),
+            crate::models::user::Permission::User,
+            db.get().unwrap(),
+        ) {
             Ok(user) => {
                 let jwt = UserToken::generate_token(&user);
                 return Ok(HttpResponse::Created().json(json!({
                     "message": "account created",
                     "jwt": &jwt
-                })))
+                })));
             }
             Err(_) => {
                 return Ok(HttpResponse::InternalServerError().json(json!({
