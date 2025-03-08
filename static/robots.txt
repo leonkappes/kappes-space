@@ -1,2 +1,4 @@
 User-Agent: *
 Allow: /
+
+sitemap: https://kappes.space/sitemap.xml

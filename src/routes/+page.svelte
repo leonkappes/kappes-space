@@ -1,81 +1,14 @@
-<script>
+<script lang="ts">
+	import { loadSlim } from '@tsparticles/slim';
 	import { onMount } from 'svelte';
 
 	onMount(async () => {
-		const module = await import('tsparticles');
-
+		const module = await import('@tsparticles/engine');
 		let tsParticles = module.tsParticles;
 
-		// @ts-ignore
-		tsParticles.load('particles', particlesConfig);
+		await loadSlim(tsParticles);
+		await tsParticles.load({ id: 'particles', url: 'particles.json' });
 	});
-
-	let particlesConfig = {
-		fullScreen: {
-			enable: false
-		},
-		particles: {
-			number: {
-				value: 60,
-				density: {
-					enable: true,
-					value_area: 700
-				}
-			},
-			color: {
-				value: '#ffffff'
-			},
-			shape: {
-				type: 'circle',
-				stroke: {
-					width: 0,
-					color: '#000000'
-				},
-			},
-			opacity: {
-				value: 1,
-				random: true,
-				anim: {
-					enable: true,
-					speed: 1,
-					opacity_min: 0,
-					sync: true
-				}
-			},
-			size: {
-				value: 3,
-				random: true,
-				anim: {
-					enable: false,
-					speed: 3,
-					size_min: 0.3,
-					sync: false
-				}
-			},
-			line_linked: {
-				enable: false,
-				distance: 150,
-				color: '#ffffff',
-				opacity: 0.4,
-				width: 1
-			},
-			move: {
-				enable: true,
-				speed: 1,
-				direction: 'none',
-				random: true,
-				straight: false,
-				out_mode: 'out',
-				bounce: false,
-				attract: {
-					enable: false,
-					rotateX: 600,
-					rotateY: 600
-				}
-			}
-		},
-		retina_detect: true
-	};
 </script>
 
 <svelte:head>
@@ -83,13 +16,16 @@
 </svelte:head>
 
 <div class="w-full h-full flex items-center justify-center relative">
-	<div class="absolute w-full h-full bg-gray-800 dark:bg-gray-700">
-	</div>
-	<div class="absolute w-full h-full" id="particles" />
+	<div class="absolute w-full h-full bg-gray-800 dark:bg-gray-700"></div>
+	<div class="absolute w-full h-full" id="particles"></div>
 	<div class="flex flex-col items-center justify-center m-auto">
 		<h1 class="lg:text-8xl md:text-6xl text-4xl mx-3 text-white z-10">Hi, I'm Leon Kappes</h1>
-		<hr class="w-11/12 z-10 opacity-50 lg:mt-3 md:mt-2" />
-		<h2 class="lg:text-5xl md:text-3xl text-xl text-white z-10 mb-5 lg:mb-16 md:mb-8 mt-2 lg:mt-4 md:mt-4">DevOps and System Administration</h2>
+		<hr class="w-11/12 z-10 opacity-50 lg:mt-3 md:mt-2 text-white" />
+		<h2
+			class="lg:text-5xl md:text-3xl text-xl text-white z-10 mb-5 lg:mb-16 md:mb-8 mt-2 lg:mt-4 md:mt-4"
+		>
+			DevOps and System Administration
+		</h2>
 		<section class="flex justify-center items-center md:text-3xl text-lg">
 			<a
 				href="mailto:leon@kappes.space"
