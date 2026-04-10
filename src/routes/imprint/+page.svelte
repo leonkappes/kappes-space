@@ -3,7 +3,7 @@
 </svelte:head>
 
 <div class="py-4 px-8 m-0 w-full">
-    <!-- Imprint -->
+	<!-- Imprint -->
 	<h1>Impressum</h1>
 	<h2 id="m46">Diensteanbieter</h2>
 	<p>Leon Kappes</p>
@@ -12,7 +12,11 @@
 	<p>Germany</p>
 	<h2 id="m56">Kontaktmöglichkeiten</h2>
 	E-Mail-Adresse:
-	<p><a class="hover:underline hover:text-indigo-700" href="mailto:leon@kappes.space">leon@kappes.space</a></p>
+	<p>
+		<a class="hover:underline hover:text-indigo-700" href="mailto:leon@kappes.space"
+			>leon@kappes.space</a
+		>
+	</p>
 	Telefon:
 	<p>+4915255104720</p>
 	<h2 id="m154">Journalistisch-redaktionelle Angebote</h2>
@@ -28,7 +32,6 @@
 	</p>
 	<h2 id="m172">Social Media und andere Onlinepräsenzen</h2>
 	Dieses Impressum gilt auch für die folgenden Social-Media-Präsenzen und Onlineprofile:
-	<p><a href="https://elsetech.cloud" target="_blank">https://elsetech.cloud</a></p>
 	<p class="seal">
 		<a
 			href="https://datenschutz-generator.de/"
@@ -39,8 +42,7 @@
 		>
 	</p>
 
-
-    <!-- Data-protection -->
+	<!-- Data-protection -->
 	<h1>Datenschutzerklärung</h1>
 	<h2 id="m14">Einleitung</h2>
 	<p>
