@@ -7,7 +7,7 @@
 
 <div class="flex flex-col h-full">
 	<Header />
-	<div class="flex-grow">
+	<div class="grow">
 		{@render children()}
 	</div>
 	<Footer />
